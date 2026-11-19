@@ -13,6 +13,9 @@ export function UtilityBar({ settings }: { settings: SiteSettings }) {
           {settings.phone && (
             <a href={`tel:${settings.phone.replace(/[^0-9+]/g, '')}`}>☎ {settings.phone}</a>
           )}
+          {settings.email && (
+            <a href={`mailto:${settings.email}`} className="hide-m">✉ {settings.email}</a>
+          )}
           <button type="button" className="wa" onClick={openWaModal}>✆ WhatsApp order</button>
         </span>
       </div>

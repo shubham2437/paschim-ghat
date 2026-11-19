@@ -7,6 +7,7 @@ export function ContactBand() {
   const openWaModal = useUiStore((s) => s.openWaModal);
   const { data } = useSiteConfig();
   const phone = data?.settings.phone ?? '';
+  const email = data?.settings.email ?? '';
 
   return (
     <div className="band" id="contact">
@@ -25,6 +26,15 @@ export function ContactBand() {
               href={`tel:${phone.replace(/[^0-9+]/g, '')}`}
             >
               ☎ {phone}
+            </a>
+          )}
+          {email && (
+            <a
+              className="btn btn-ghost"
+              style={{ color: '#F3E7CE', borderColor: 'rgba(235,208,138,.4)' }}
+              href={`mailto:${email}`}
+            >
+              ✉ {email}
             </a>
           )}
         </div>

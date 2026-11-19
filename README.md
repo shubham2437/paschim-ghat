@@ -1,4 +1,4 @@
-# Pachimghat storefront
+# Paschim Ghat storefront
 
 Spices, coffee, tea, dry fruits and oils storefront — Next.js App Router with
 a small BFF (Backend-for-Frontend) layer. The whole catalogue comes live from
@@ -176,11 +176,29 @@ no other code changes needed.
 
 ## Getting started
 
+Requires Node.js >= 18.18.
+
 ```bash
-cp .env.example .env.local
+cp .env.example .env.local   # then fill in the values
 npm install
-npm run dev
+npm run dev                  # http://localhost:3000
 ```
+
+### Scripts
+
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Start the dev server |
+| `npm run build` | Production build |
+| `npm start` | Serve the production build |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | TypeScript check (`tsc --noEmit`) |
+
+### Environment variables
+
+See `.env.example`. Key ones: `CATALOGUE_SHEET_ID`,
+`GOOGLE_SERVICE_ACCOUNT_EMAIL`, `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY`,
+`WHATSAPP_BUSINESS_NUMBER`, `NEXT_PUBLIC_SITE_URL`.
 
 ## Notes
 

@@ -9,6 +9,7 @@ import { MobileNav } from '@/components/layout/MobileNav';
 import { Footer } from '@/components/layout/Footer';
 import { WhatsAppFloat } from '@/components/layout/WhatsAppFloat';
 import { CartDrawer } from '@/features/cart/components/CartDrawer';
+import { TurnstileProvider } from '@/components/ui/Turnstile';
 import { Scrim } from '@/components/ui/Scrim';
 import { WhatsAppOrderModal } from '@/features/support/WhatsAppOrderModal';
 
@@ -49,11 +50,14 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { settings } = await getPublicSiteConfig();
+  // Public key, read at request time so a runtime Worker variable is enough.
+  const turnstileSiteKey = process.env.TURNSTILE_SITE_KEY || process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '';
 
   return (
     <html lang="en" className={`${fraunces.variable} ${inter.variable}`}>
       <body>
         <ToastProvider>
+          <TurnstileProvider siteKey={turnstileSiteKey}>
           <MobileNav />
           <Header settings={settings} />
           {children}
@@ -62,6 +66,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <Scrim />
           <CartDrawer />
           <WhatsAppOrderModal />
+          </TurnstileProvider>
         </ToastProvider>
       </body>
     </html>

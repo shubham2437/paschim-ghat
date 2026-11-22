@@ -6,7 +6,7 @@ import { useCartStore, cartTotals } from '@/features/cart/store/cart-store';
 import { ProductArt } from '@/features/catalog/components/ProductArt';
 import { useToast } from '@/components/ui/toast-provider';
 import { useSiteConfig } from '@/features/catalog/hooks/useSiteConfig';
-import { Turnstile, turnstileEnabled } from '@/components/ui/Turnstile';
+import { Turnstile, useTurnstileEnabled } from '@/components/ui/Turnstile';
 import { money } from '@/lib/utils/format';
 
 const fieldStyle: CSSProperties = {
@@ -36,6 +36,7 @@ export function CartDrawer() {
   const [city, setCity] = useState('');
   const [pincode, setPincode] = useState('');
   const [detecting, setDetecting] = useState(false);
+  const turnstileEnabled = useTurnstileEnabled();
   const [token, setToken] = useState('');
   const [tsReset, setTsReset] = useState(0);
 

@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { createContext, useContext, useEffect, useRef, type ReactNode } from 'react';
 
-const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 const SCRIPT_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 
 interface TurnstileApi {
@@ -33,8 +32,18 @@ function loadScript(): Promise<void> {
   return scriptPromise;
 }
 
-/** True when a Turnstile site key is configured for this build. */
-export const turnstileEnabled = Boolean(SITE_KEY);
+const SiteKeyContext = createContext<string>('');
+
+/** Supplies the (public) site key, read from the server at request time by
+ * the root layout, so it works as a plain runtime Worker variable. */
+export function TurnstileProvider({ siteKey, children }: { siteKey: string; children: ReactNode }) {
+  return <SiteKeyContext.Provider value={siteKey}>{children}</SiteKeyContext.Provider>;
+}
+
+/** True when a Turnstile site key is configured. */
+export function useTurnstileEnabled(): boolean {
+  return Boolean(useContext(SiteKeyContext));
+}
 
 /**
  * Cloudflare Turnstile widget in "interaction-only" mode: invisible unless
@@ -43,6 +52,7 @@ export const turnstileEnabled = Boolean(SITE_KEY);
  * after a submit — tokens are single-use.
  */
 export function Turnstile({ onToken, resetKey = 0 }: { onToken: (token: string) => void; resetKey?: number }) {
+  const SITE_KEY = useContext(SiteKeyContext);
   const ref = useRef<HTMLDivElement>(null);
   const widgetId = useRef<string | null>(null);
   const cb = useRef(onToken);
@@ -68,7 +78,7 @@ export function Turnstile({ onToken, resetKey = 0 }: { onToken: (token: string) 
       if (widgetId.current && window.turnstile) window.turnstile.remove(widgetId.current);
       widgetId.current = null;
     };
-  }, []);
+  }, [SITE_KEY]);
 
   useEffect(() => {
     if (resetKey > 0 && widgetId.current && window.turnstile) {

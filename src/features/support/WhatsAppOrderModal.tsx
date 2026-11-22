@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from 'react';
 import { useUiStore } from '@/components/ui/ui-store';
 import { useToast } from '@/components/ui/toast-provider';
-import { Turnstile, turnstileEnabled } from '@/components/ui/Turnstile';
+import { Turnstile, useTurnstileEnabled } from '@/components/ui/Turnstile';
 
 export function WhatsAppOrderModal() {
   const open = useUiStore((s) => s.waModalOpen);
@@ -13,6 +13,7 @@ export function WhatsAppOrderModal() {
   const [phone, setPhone] = useState('');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
+  const turnstileEnabled = useTurnstileEnabled();
   const [token, setToken] = useState('');
   const [tsReset, setTsReset] = useState(0);
 

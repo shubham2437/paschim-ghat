@@ -33,7 +33,7 @@ src/
 - **Turnstile:** both order forms include Cloudflare Turnstile (invisible
   unless a challenge is needed). The server verifies the token with
   Cloudflare before handling an order and fails closed if it cannot. Set
-  `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (build variable) and `TURNSTILE_SECRET_KEY`
+  `TURNSTILE_SITE_KEY` (runtime variable, public) and `TURNSTILE_SECRET_KEY`
   (secret). With no secret set the check is skipped.
 - **Rate limit:** 5 order requests per minute per IP, using the Workers
   Rate Limiting binding `ORDER_RATE_LIMITER` (`wrangler.jsonc`), with an

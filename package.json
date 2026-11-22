@@ -8,27 +8,32 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "opennextjs-cloudflare build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "preview": "opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare deploy",
+    "build:next": "next build"
   },
   "dependencies": {
+    "@opennextjs/cloudflare": "^1.20.18",
     "clsx": "2.1.1",
-    "next": "14.2.35",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
+    "next": "^15.5.29",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "server-only": "0.0.1",
+    "wrangler": "^4.166.0",
     "zod": "3.23.8",
     "zustand": "4.5.5"
   },
   "devDependencies": {
     "@types/node": "20.14.9",
-    "@types/react": "18.3.5",
-    "@types/react-dom": "18.3.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "autoprefixer": "10.4.20",
     "eslint": "8.57.0",
-    "eslint-config-next": "14.2.35",
+    "eslint-config-next": "^15.5.29",
     "postcss": "8.4.47",
     "tailwindcss": "3.4.13",
     "typescript": "5.5.4"

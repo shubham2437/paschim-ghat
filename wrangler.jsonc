@@ -7,5 +7,25 @@
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
-  }
+  },
+  // Keep variables set in the Cloudflare dashboard (Settings → Variables and
+  // Secrets) instead of wiping them on every deploy from GitHub.
+  "keep_vars": true,
+  // Rate limits shared across all of Cloudflare's network, per client IP.
+  // namespace_id is any number unique within this Cloudflare account.
+  // period must be 10 or 60 (seconds).
+  "ratelimits": [
+    {
+      // POST /api/whatsapp-order — 5 per minute
+      "name": "ORDER_RATE_LIMITER",
+      "namespace_id": "1001",
+      "simple": { "limit": 5, "period": 60 }
+    },
+    {
+      // POST /api/whatsapp-checkout — 10 per minute
+      "name": "CHECKOUT_RATE_LIMITER",
+      "namespace_id": "1002",
+      "simple": { "limit": 10, "period": 60 }
+    }
+  ]
 }

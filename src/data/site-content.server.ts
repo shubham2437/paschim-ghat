@@ -86,5 +86,12 @@ export async function getSiteConfig(): Promise<SiteConfig> {
  * WhatsApp number, which stays server-side (see lib/server/whatsapp.ts). */
 export async function getPublicSiteConfig(): Promise<SiteConfig> {
   const { settings, coupons, offers } = await getSiteConfig();
-  return { settings: { ...settings, whatsapp: '' }, coupons, offers };
+  return {
+    settings: { ...settings, whatsapp: '' },
+    coupons,
+    offers,
+    // Only shown to the browser when the matching secret is also set, so the
+    // widget never appears without the server actually checking its tokens.
+    turnstileSiteKey: process.env.TURNSTILE_SECRET_KEY ? process.env.TURNSTILE_SITE_KEY || '' : '',
+  };
 }

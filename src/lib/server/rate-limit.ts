@@ -54,13 +54,49 @@ export function rateLimit(
 }
 
 /**
- * Best-effort client identifier for rate limiting. Trusts the first
- * `x-forwarded-for` entry only when running behind a known proxy — for a
- * self-hosted deploy this should be tightened to the platform's real
- * client-IP header (e.g. `x-real-ip`, Vercel's `x-vercel-forwarded-for`).
+ * Client identifier for rate limiting.
+ *
+ * On Cloudflare, `cf-connecting-ip` is set by Cloudflare's edge from the real
+ * TCP connection and overwrites anything the client sends, so it can't be
+ * spoofed. `x-forwarded-for` / `x-real-ip` are only used as a fallback for
+ * local dev (`next dev`), where there is no Cloudflare edge in front.
  */
 export function clientKeyFromHeaders(headers: Headers): string {
+  const cfIp = headers.get('cf-connecting-ip')?.trim();
+  if (cfIp) return cfIp;
   const forwarded = headers.get('x-forwarded-for');
   const ip = forwarded ? forwarded.split(',')[0]?.trim() : null;
   return ip || headers.get('x-real-ip') || 'anonymous';
+}
+
+/** Minimal shape of a Workers Rate Limiting binding (see wrangler.jsonc). */
+interface RateLimitBinding {
+  limit(options: { key: string }): Promise<{ success: boolean }>;
+}
+
+type EdgeLimiterName = 'ORDER_RATE_LIMITER' | 'CHECKOUT_RATE_LIMITER';
+
+/**
+ * Rate limit shared across every Cloudflare location and Worker isolate,
+ * using a Workers Rate Limiting binding declared in wrangler.jsonc. The
+ * in-memory limiter above only counts requests that happen to land on the
+ * same isolate, so on its own it is easy to get around.
+ *
+ * Falls back to the in-memory limiter when the binding isn't available
+ * (local `next dev`), so development keeps working.
+ */
+export async function edgeRateLimit(
+  binding: EdgeLimiterName,
+  key: string,
+  fallback: { limit: number; windowMs: number }
+): Promise<{ success: boolean }> {
+  try {
+    const { getCloudflareContext } = await import('@opennextjs/cloudflare');
+    const env = getCloudflareContext().env as unknown as Partial<Record<EdgeLimiterName, RateLimitBinding>>;
+    const limiter = env[binding];
+    if (limiter) return await limiter.limit({ key });
+  } catch {
+    // Not running on Workers (e.g. `next dev`) — use the local limiter.
+  }
+  return rateLimit(`${binding}:${key}`, fallback);
 }

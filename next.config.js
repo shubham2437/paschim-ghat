@@ -13,7 +13,9 @@
 const isDev = process.env.NODE_ENV !== 'production';
 const CSP = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
+  // challenges.cloudflare.com serves the Turnstile bot-check widget (script + iframe).
+  `script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com${isDev ? " 'unsafe-eval'" : ''}`,
+  'frame-src https://challenges.cloudflare.com',
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self' data:",

@@ -34,4 +34,8 @@ export interface SiteConfig {
   settings: SiteSettings;
   coupons: CouponDef[];
   offers: string[];
+  /** Public Cloudflare Turnstile site key ('' = bot check not configured).
+   * Read from the TURNSTILE_SITE_KEY runtime variable, so it can be changed
+   * in the Cloudflare dashboard without a rebuild. */
+  turnstileSiteKey?: string;
 }

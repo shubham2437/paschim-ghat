@@ -6,14 +6,18 @@ import { useCatalogData } from '@/features/catalog/hooks/useCatalogData';
 import { useCatalogFilterStore } from '@/features/catalog/store/catalog-filter-store';
 import type { SiteSettings } from '@/types/site-content';
 
+const DEFAULT_ADDRESS = '5/376A, South Vavanoor Post, Koottanad, Palakkad District, Kerala 679533';
+const DEFAULT_EMAIL = 'pachimghat@gmail.com';
+
 export function Footer({ settings }: { settings: SiteSettings }) {
   const openWaModal = useUiStore((s) => s.openWaModal);
   const setCategory = useCatalogFilterStore((s) => s.setCategory);
   const { data } = useCatalogData();
+  const email = settings.email || DEFAULT_EMAIL;
   const legal = [
     settings.fssai && `FSSAI Lic. ${settings.fssai}`,
     settings.gstin && `GSTIN ${settings.gstin}`,
-    settings.address,
+    settings.address || DEFAULT_ADDRESS,
   ].filter(Boolean) as string[];
 
   return (
@@ -57,7 +61,7 @@ export function Footer({ settings }: { settings: SiteSettings }) {
               Order on WhatsApp
             </a>
             {settings.phone && <a href={`tel:${settings.phone.replace(/[^0-9+]/g, '')}`}>Call {settings.phone}</a>}
-            {settings.email && <a href={`mailto:${settings.email}`}>{settings.email}</a>}
+            <a href={`mailto:${email}`}>{email}</a>
           </div>
         </div>
         <div className="f-bot">

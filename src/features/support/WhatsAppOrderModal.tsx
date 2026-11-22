@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import { useUiStore } from '@/components/ui/ui-store';
 import { useToast } from '@/components/ui/toast-provider';
+import { useSiteConfig } from '@/features/catalog/hooks/useSiteConfig';
+import { Turnstile, type TurnstileHandle } from '@/components/ui/Turnstile';
 
 export function WhatsAppOrderModal() {
   const open = useUiStore((s) => s.waModalOpen);
@@ -12,17 +14,25 @@ export function WhatsAppOrderModal() {
   const [phone, setPhone] = useState('');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const turnstileRef = useRef<TurnstileHandle>(null);
+  const { data: siteConfig } = useSiteConfig();
+  const turnstileSiteKey = siteConfig?.turnstileSiteKey ?? '';
 
   if (!open) return null;
 
   async function submit(e: FormEvent) {
     e.preventDefault();
+    if (turnstileSiteKey && !turnstileToken) {
+      toast('Please wait a moment for the security check to finish');
+      return;
+    }
     setBusy(true);
     try {
       const res = await fetch('/api/whatsapp-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, phone, message }),
+        body: JSON.stringify({ name, phone, message, turnstileToken: turnstileToken || undefined }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -37,6 +47,9 @@ export function WhatsAppOrderModal() {
     } catch {
       toast('Network error — please try again');
     } finally {
+      // Turnstile tokens are single-use: get a fresh one for any retry.
+      setTurnstileToken('');
+      turnstileRef.current?.reset();
       setBusy(false);
     }
   }
@@ -83,6 +96,9 @@ export function WhatsAppOrderModal() {
             onChange={(e) => setMessage(e.target.value)}
             style={{ padding: 11, borderRadius: 12, border: '1px solid var(--line-2)', background: 'var(--paper)', resize: 'vertical' }}
           />
+          {turnstileSiteKey && (
+            <Turnstile ref={turnstileRef} siteKey={turnstileSiteKey} action="wa-order" onToken={setTurnstileToken} />
+          )}
           <button type="submit" className="btn btn-gold btn-block" disabled={busy}>
             {busy ? 'Opening…' : '✆ Continue on WhatsApp'}
           </button>

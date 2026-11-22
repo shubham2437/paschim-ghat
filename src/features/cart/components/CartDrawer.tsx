@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, type CSSProperties } from 'react';
+import { useRef, useState, type CSSProperties } from 'react';
 import { useUiStore } from '@/components/ui/ui-store';
 import { useCartStore, cartTotals } from '@/features/cart/store/cart-store';
 import { ProductArt } from '@/features/catalog/components/ProductArt';
 import { useToast } from '@/components/ui/toast-provider';
 import { useSiteConfig } from '@/features/catalog/hooks/useSiteConfig';
 import { money } from '@/lib/utils/format';
+import { applyCoupon } from '@/lib/pricing';
+import { Turnstile, type TurnstileHandle } from '@/components/ui/Turnstile';
 
 const fieldStyle: CSSProperties = {
   padding: 10,
@@ -35,6 +37,9 @@ export function CartDrawer() {
   const [city, setCity] = useState('');
   const [pincode, setPincode] = useState('');
   const [detecting, setDetecting] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const turnstileRef = useRef<TurnstileHandle>(null);
+  const turnstileSiteKey = siteConfig?.turnstileSiteKey ?? '';
 
   const T = cartTotals(
     lines,
@@ -42,11 +47,7 @@ export function CartDrawer() {
     siteConfig?.settings.delivery_fee
   );
   const c = applied ? siteConfig?.coupons.find((x) => x.code === applied) : null;
-  let discount = 0;
-  if (c?.type === 'pct') discount = Math.round((T.sub * c.value) / 100);
-  if (c?.type === 'flat') discount = Math.min(c.value, T.sub);
-  const ship = c?.type === 'ship' ? 0 : T.ship;
-  const total = Math.max(0, T.sub - discount) + ship;
+  const { discount, ship, total } = applyCoupon(T.sub, T.ship, c);
 
   const list = Object.values(lines);
   const hasFreeShip = T.freeShipAt > 0;
@@ -295,6 +296,16 @@ export function CartDrawer() {
           <span>{ship ? money(ship) : deliveryUnknown ? 'Confirmed on WhatsApp' : 'FREE'}</span>
         </div>
         <div className="srow tot"><span>{deliveryUnknown ? 'Total (before delivery)' : 'Total'}</span><span>{money(total)}</span></div>
+        {turnstileSiteKey && T.items > 0 && (
+          <div style={{ marginTop: 12 }}>
+            <Turnstile
+              ref={turnstileRef}
+              siteKey={turnstileSiteKey}
+              action="checkout"
+              onToken={setTurnstileToken}
+            />
+          </div>
+        )}
         <button
           className="btn btn-primary btn-block"
           style={{ marginTop: 12 }}
@@ -304,7 +315,8 @@ export function CartDrawer() {
               toast('Enter your name');
               return;
             }
-            if (!/^[0-9+\-\s]{7,16}$/.test(phone.trim())) {
+            const phoneDigits = phone.replace(/\D/g, '').length;
+            if (!/^[0-9+\-\s]{10,18}$/.test(phone.trim()) || phoneDigits < 10 || phoneDigits > 13) {
               toast('Enter a valid phone number');
               return;
             }
@@ -320,19 +332,25 @@ export function CartDrawer() {
               toast('Enter a valid 6-digit PIN code');
               return;
             }
+            if (turnstileSiteKey && !turnstileToken) {
+              toast('Please wait a moment for the security check to finish');
+              return;
+            }
             setCheckingOut(true);
             try {
               const res = await fetch('/api/whatsapp-checkout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                  // Only product IDs + quantities are sent: the server looks up
+                  // the real prices in the catalogue and recomputes the total.
                   items: list.map((line) => ({
-                    name: line.name,
+                    productId: line.productId,
+                    sku: line.sku,
                     desc: line.desc,
                     qty: line.qty,
-                    price: line.price,
                   })),
-                  total,
+                  turnstileToken: turnstileToken || undefined,
                   couponCode: c ? applied : undefined,
                   customerName,
                   phone,
@@ -352,6 +370,9 @@ export function CartDrawer() {
             } catch {
               toast('Network error — please try again');
             } finally {
+              // Turnstile tokens are single-use: get a fresh one for any retry.
+              setTurnstileToken('');
+              turnstileRef.current?.reset();
               setCheckingOut(false);
             }
           }}

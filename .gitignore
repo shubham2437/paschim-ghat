@@ -8,3 +8,7 @@ npm-debug.log*
 .DS_Store
 *.tsbuildinfo
 next-env.d.ts
+
+# OpenNext / Cloudflare
+.open-next
+.wrangler

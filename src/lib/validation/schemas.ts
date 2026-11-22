@@ -9,35 +9,68 @@ export const productQuerySchema = z.object({
   fresh: z.enum(['1']).optional(),
 });
 
-export const whatsappOrderSchema = z.object({
-  name: z.string().trim().min(2).max(80),
-  phone: z
+// --- shared field rules (server-side source of truth; never trust the browser) ---
+
+// eslint-disable-next-line no-control-regex
+const CONTROL_CHARS = /[\x00-\x08\x0b-\x1f\x7f]/;
+
+/** Single-line text: trimmed, bounded, no control characters. */
+const line = (min: number, max: number, msg?: string) =>
+  z
     .string()
     .trim()
-    .regex(/^[0-9+\-\s]{7,16}$/, 'Enter a valid phone number'),
-  message: z.string().trim().max(500).optional().default(''),
+    .min(min, msg)
+    .max(max)
+    .refine((v) => !CONTROL_CHARS.test(v) && !/[\r\n]/.test(v), 'Contains invalid characters');
+
+const personName = (msg: string) =>
+  line(2, 80, msg).refine((v) => /\p{L}/u.test(v), msg);
+
+/** 10–13 digits, optional leading +; spaces and dashes are stripped. */
+const phoneField = z
+  .string()
+  .trim()
+  .max(20)
+  .transform((v) => v.replace(/[\s-]/g, ''))
+  .refine((v) => /^\+?\d{10,13}$/.test(v), 'Enter a valid phone number');
+
+const turnstileToken = z.string().max(2048).optional();
+
+export const whatsappOrderSchema = z.object({
+  name: personName('Enter your name'),
+  phone: phoneField,
+  message: z
+    .string()
+    .trim()
+    .max(500)
+    .refine((v) => !CONTROL_CHARS.test(v), 'Contains invalid characters')
+    .optional()
+    .default(''),
+  turnstileToken,
 });
 
+/**
+ * The browser only says WHICH product/pack and HOW MANY. Names, prices,
+ * discounts and totals are all looked up / recomputed on the server.
+ */
 const checkoutLineSchema = z.object({
-  name: z.string().trim().min(1).max(120),
+  productId: z.string().trim().min(1).max(60),
+  sku: z.string().trim().max(60).optional().default(''),
+  /** Pack label, e.g. "250g" — only used when the row has no SKU. */
   desc: z.string().trim().max(60).optional().default(''),
-  qty: z.coerce.number().int().min(1).max(99),
-  price: z.coerce.number().min(0).max(1_000_000),
+  qty: z.coerce.number().int('Quantity must be a whole number').min(1).max(99),
 });
 
 export const whatsappCheckoutSchema = z.object({
-  items: z.array(checkoutLineSchema).min(1).max(50),
-  total: z.coerce.number().min(0).max(10_000_000),
+  items: z.array(checkoutLineSchema).min(1, 'Your basket is empty').max(50),
   couponCode: z.string().trim().max(30).optional(),
-  customerName: z.string().trim().min(2, 'Enter your name').max(80),
-  addressLine1: z.string().trim().min(4, 'Enter flat/house no. & building').max(200),
-  addressLine2: z.string().trim().max(200).optional().default(''),
-  city: z.string().trim().min(2, 'Enter your city').max(100),
-  pincode: z.string().trim().regex(/^\d{6}$/, 'Enter a valid 6-digit PIN code'),
-  phone: z
-    .string()
-    .trim()
-    .regex(/^[0-9+\-\s]{7,16}$/, 'Enter a valid phone number'),
+  customerName: personName('Enter your name'),
+  addressLine1: line(4, 200, 'Enter flat/house no. & building'),
+  addressLine2: line(0, 200).optional().default(''),
+  city: line(2, 100, 'Enter your city'),
+  pincode: z.string().trim().regex(/^[1-9]\d{5}$/, 'Enter a valid 6-digit PIN code'),
+  phone: phoneField,
+  turnstileToken,
 });
 
 export const reverseGeocodeQuerySchema = z.object({

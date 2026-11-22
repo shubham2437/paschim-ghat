@@ -28,6 +28,20 @@ src/
   types/               shared TypeScript types
 ```
 
+## Order-form security
+
+- **Turnstile:** both order forms include Cloudflare Turnstile (invisible
+  unless a challenge is needed). The server verifies the token with
+  Cloudflare before handling an order and fails closed if it cannot. Set
+  `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (build variable) and `TURNSTILE_SECRET_KEY`
+  (secret). With no secret set the check is skipped.
+- **Rate limit:** 5 order requests per minute per IP, using the Workers
+  Rate Limiting binding `ORDER_RATE_LIMITER` (`wrangler.jsonc`), with an
+  in-memory fallback for local dev.
+- **Validation:** all input is validated server-side with zod. Checkout only
+  accepts product IDs and quantities; names, prices, coupon discount,
+  delivery and total are recomputed from the catalogue on the server.
+
 ## The catalogue Google Sheet
 
 Set `CATALOGUE_SHEET_ID` (see `.env.example`) to the Sheet's ID. Nothing about

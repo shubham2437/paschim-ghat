@@ -6,6 +6,7 @@ import { useCartStore, cartTotals } from '@/features/cart/store/cart-store';
 import { ProductArt } from '@/features/catalog/components/ProductArt';
 import { useToast } from '@/components/ui/toast-provider';
 import { useSiteConfig } from '@/features/catalog/hooks/useSiteConfig';
+import { Turnstile, turnstileEnabled } from '@/components/ui/Turnstile';
 import { money } from '@/lib/utils/format';
 
 const fieldStyle: CSSProperties = {
@@ -35,6 +36,8 @@ export function CartDrawer() {
   const [city, setCity] = useState('');
   const [pincode, setPincode] = useState('');
   const [detecting, setDetecting] = useState(false);
+  const [token, setToken] = useState('');
+  const [tsReset, setTsReset] = useState(0);
 
   const T = cartTotals(
     lines,
@@ -295,6 +298,7 @@ export function CartDrawer() {
           <span>{ship ? money(ship) : deliveryUnknown ? 'Confirmed on WhatsApp' : 'FREE'}</span>
         </div>
         <div className="srow tot"><span>{deliveryUnknown ? 'Total (before delivery)' : 'Total'}</span><span>{money(total)}</span></div>
+        {list.length > 0 && <Turnstile onToken={setToken} resetKey={tsReset} />}
         <button
           className="btn btn-primary btn-block"
           style={{ marginTop: 12 }}
@@ -304,7 +308,7 @@ export function CartDrawer() {
               toast('Enter your name');
               return;
             }
-            if (!/^[0-9+\-\s]{7,16}$/.test(phone.trim())) {
+            if (!/^\+?\d{10,13}$/.test(phone.replace(/[\s-]/g, ''))) {
               toast('Enter a valid phone number');
               return;
             }
@@ -320,19 +324,23 @@ export function CartDrawer() {
               toast('Enter a valid 6-digit PIN code');
               return;
             }
+            if (turnstileEnabled && !token) {
+              toast('Please wait a moment for the security check, then try again');
+              return;
+            }
             setCheckingOut(true);
             try {
               const res = await fetch('/api/whatsapp-checkout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                  // Only IDs and quantities: the server looks up prices itself.
                   items: list.map((line) => ({
-                    name: line.name,
+                    productId: line.productId,
+                    sku: line.sku,
                     desc: line.desc,
                     qty: line.qty,
-                    price: line.price,
                   })),
-                  total,
                   couponCode: c ? applied : undefined,
                   customerName,
                   phone,
@@ -340,6 +348,7 @@ export function CartDrawer() {
                   addressLine2,
                   city,
                   pincode,
+                  turnstileToken: token,
                 }),
               });
               const data = await res.json();
@@ -353,6 +362,7 @@ export function CartDrawer() {
               toast('Network error — please try again');
             } finally {
               setCheckingOut(false);
+              setTsReset((n) => n + 1); // tokens are single-use
             }
           }}
         >

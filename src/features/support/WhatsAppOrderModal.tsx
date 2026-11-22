@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from 'react';
 import { useUiStore } from '@/components/ui/ui-store';
 import { useToast } from '@/components/ui/toast-provider';
+import { Turnstile, turnstileEnabled } from '@/components/ui/Turnstile';
 
 export function WhatsAppOrderModal() {
   const open = useUiStore((s) => s.waModalOpen);
@@ -12,17 +13,23 @@ export function WhatsAppOrderModal() {
   const [phone, setPhone] = useState('');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
+  const [token, setToken] = useState('');
+  const [tsReset, setTsReset] = useState(0);
 
   if (!open) return null;
 
   async function submit(e: FormEvent) {
     e.preventDefault();
+    if (turnstileEnabled && !token) {
+      toast('Please wait a moment for the security check, then try again');
+      return;
+    }
     setBusy(true);
     try {
       const res = await fetch('/api/whatsapp-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, phone, message }),
+        body: JSON.stringify({ name, phone, message, turnstileToken: token }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -38,6 +45,7 @@ export function WhatsAppOrderModal() {
       toast('Network error — please try again');
     } finally {
       setBusy(false);
+      setTsReset((n) => n + 1); // tokens are single-use
     }
   }
 
@@ -83,6 +91,7 @@ export function WhatsAppOrderModal() {
             onChange={(e) => setMessage(e.target.value)}
             style={{ padding: 11, borderRadius: 12, border: '1px solid var(--line-2)', background: 'var(--paper)', resize: 'vertical' }}
           />
+          <Turnstile onToken={setToken} resetKey={tsReset} />
           <button type="submit" className="btn btn-gold btn-block" disabled={busy}>
             {busy ? 'Opening…' : '✆ Continue on WhatsApp'}
           </button>

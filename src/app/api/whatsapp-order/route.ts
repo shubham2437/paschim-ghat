@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { whatsappOrderSchema } from '@/lib/validation/schemas';
-import { clientKeyFromHeaders, rateLimit } from '@/lib/server/rate-limit';
-import { isTrustedOrigin } from '@/lib/server/origin-guard';
+import { guardOrderRequest } from '@/lib/server/order-guard';
+import { verifyTurnstile } from '@/lib/server/turnstile';
 import { getSiteConfig } from '@/data/site-content.server';
 import { buildWaUrl } from '@/lib/server/whatsapp';
 
@@ -10,36 +10,20 @@ export const runtime = 'nodejs';
 const MAX_BODY_BYTES = 4_000;
 
 export async function POST(request: Request) {
-  if (!isTrustedOrigin(request)) {
-    return NextResponse.json({ error: 'Origin not allowed' }, { status: 403 });
-  }
+  const guarded = await guardOrderRequest(request, 'wa-order', MAX_BODY_BYTES);
+  if (!guarded.ok) return guarded.response;
 
-  const key = clientKeyFromHeaders(request.headers);
-  const limited = rateLimit(`wa-order:${key}`, { limit: 5, windowMs: 60_000 });
-  if (!limited.success) {
-    return NextResponse.json({ error: 'Too many requests, try again shortly' }, { status: 429 });
-  }
-
-  const contentLength = Number(request.headers.get('content-length') ?? '0');
-  if (contentLength > MAX_BODY_BYTES) {
-    return NextResponse.json({ error: 'Payload too large' }, { status: 413 });
-  }
-
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: 'Malformed JSON body' }, { status: 400 });
-  }
-
-  const parsed = whatsappOrderSchema.safeParse(body);
+  const parsed = whatsappOrderSchema.safeParse(guarded.body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: 'Check the name, phone and message fields' },
+      { error: parsed.error.issues[0]?.message || 'Check the name, phone and message fields' },
       { status: 422 }
     );
   }
-  const { name, message } = parsed.data;
+  const { name, message, turnstileToken } = parsed.data;
+
+  const human = await verifyTurnstile(turnstileToken, guarded.ip);
+  if (!human.ok) return NextResponse.json({ error: human.error }, { status: human.status });
 
   const { settings } = await getSiteConfig();
   const greeting = `Hi ${settings.brand_name}, I'm ${name}. ${message || "I'd like to place an order."}`;

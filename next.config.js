@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 
+// Cloudflare Turnstile (bot check on the order forms) needs its script, an
+// iframe and a connection to challenges.cloudflare.com.
 // Fonts are self-hosted via next/font at build time, so the CSP does not need
 // to allow any third-party font or script origins at runtime.
 //
@@ -13,11 +15,12 @@
 const isDev = process.env.NODE_ENV !== 'production';
 const CSP = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
+  `script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com${isDev ? " 'unsafe-eval'" : ''}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
-  "connect-src 'self'",
+  "connect-src 'self' https://challenges.cloudflare.com",
+  "frame-src https://challenges.cloudflare.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",

@@ -60,7 +60,34 @@ export function rateLimit(
  * client-IP header (e.g. `x-real-ip`, Vercel's `x-vercel-forwarded-for`).
  */
 export function clientKeyFromHeaders(headers: Headers): string {
+  // Cloudflare sets this to the real client IP and overwrites any spoofed copy.
+  const cf = headers.get('cf-connecting-ip');
+  if (cf) return cf.trim();
   const forwarded = headers.get('x-forwarded-for');
   const ip = forwarded ? forwarded.split(',')[0]?.trim() : null;
   return ip || headers.get('x-real-ip') || 'anonymous';
+}
+
+/**
+ * Order-endpoint limiter: 5 requests per minute per IP.
+ *
+ * On Cloudflare Workers this uses the Workers Rate Limiting binding
+ * (`ORDER_RATE_LIMITER` in wrangler.jsonc), which is shared across the whole
+ * edge location. Where the binding is not available (local `next dev`), it
+ * falls back to the in-memory limiter above.
+ */
+export async function orderRateLimit(name: string, ip: string): Promise<boolean> {
+  try {
+    const { getCloudflareContext } = await import('@opennextjs/cloudflare');
+    const { env } = getCloudflareContext();
+    const limiter = (env as { ORDER_RATE_LIMITER?: { limit(o: { key: string }): Promise<{ success: boolean }> } })
+      .ORDER_RATE_LIMITER;
+    if (limiter) {
+      const { success } = await limiter.limit({ key: `${name}:${ip}` });
+      return success;
+    }
+  } catch {
+    // not running on Workers — use the in-memory fallback
+  }
+  return rateLimit(`${name}:${ip}`, { limit: 5, windowMs: 60_000 }).success;
 }

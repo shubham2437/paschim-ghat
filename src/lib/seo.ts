@@ -1,7 +1,24 @@
-/** Canonical public origin, e.g. https://pachimghat.com (no trailing slash). */
+const PRODUCTION_SITE_URL = 'https://pachimghat.com';
+
+/**
+ * Canonical public origin (no trailing slash). Used for the sitemap, robots,
+ * canonical links and structured data.
+ *
+ * Search engines reject a sitemap whose URLs are on a different host, so a
+ * workers.dev preview address is never used as the canonical origin: it falls
+ * back to the real domain instead.
+ */
 export function getSiteUrl(): string {
-  const raw = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-  return raw.replace(/\/+$/, '');
+  let raw = (process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || '').trim().replace(/\/+$/, '');
+  if (raw && !raw.includes('://')) raw = `https://${raw}`;
+  let usable = false;
+  try {
+    usable = !!raw && !/\.workers\.dev$/i.test(new URL(raw).hostname);
+  } catch {
+    usable = false;
+  }
+  if (usable) return raw;
+  return process.env.NODE_ENV === 'production' ? PRODUCTION_SITE_URL : 'http://localhost:3000';
 }
 
 /** Escape `<` so JSON-LD can never close its own <script> tag. */

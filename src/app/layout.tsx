@@ -63,7 +63,6 @@ export async function generateMetadata(): Promise<Metadata> {
       images: [logo],
     },
     twitter: { card: 'summary', title, description, images: [logo.url] },
-    icons: { icon: '/logo.png', apple: '/logo.png' },
   };
 }
 

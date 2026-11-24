@@ -33,7 +33,7 @@ export function Header({ settings }: { settings: SiteSettings }) {
               </svg>
             </button>
             <a className="logo" href="#top">
-              <BrandLogo alt={`${settings.brand_name} logo`} />
+              <BrandLogo alt={`${settings.brand_name} logo`} priority />
               <span className="logo-tx">
                 <b>{settings.brand_name}</b>
                 <small>{settings.brand_sub}</small>

@@ -205,3 +205,21 @@ See `.env.example`. Key ones: `CATALOGUE_SHEET_ID`,
 Checkout hands the basket to WhatsApp; there is no online payment. Product
 pictures are procedurally generated (`src/features/catalog/product-art.ts`),
 so the app ships with no product image files.
+
+## Cloudflare free-plan limits
+
+The Workers **free plan is not unlimited**: it allows **100,000 requests per day**,
+counted from midnight UTC. Once that is used up, visitors see **Error 1027**
+until the counter resets. Static files in `.open-next/assets` (JS, CSS, `/logo.png`,
+favicons) are served free and do not count; every page view, `/api/*` call and
+`/art` image request does.
+
+How the storefront keeps usage down:
+
+- `/art` images are sent with `Cache-Control: immutable` (1 year), so a returning
+  visitor's browser never asks for the same image twice.
+- Images below the fold use `loading="lazy"`, so they are only requested when scrolled to.
+- `/api/*` responses are `no-store`; avoid adding polling or auto-refresh calls.
+
+If traffic grows past the free limit, move to **Workers Paid** (about US$5/month,
+10 million requests/month included) rather than trimming features.

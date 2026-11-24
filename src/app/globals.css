@@ -93,6 +93,9 @@ header.site{position:sticky;top:0;z-index:60;background:rgba(251,246,236,.92);ba
 .btn-gold{background:linear-gradient(150deg,var(--saffron),var(--gold));color:#2A1B00;box-shadow:0 10px 26px -14px rgba(192,139,34,.9)}
 .btn-ghost{border:1px solid var(--line-2);color:var(--ink)}
 .btn-ghost:hover{background:var(--cream-2)}
+/* Ghost button for dark (forest) backgrounds: light text stays readable on hover. */
+.btn-ghost-light{border:1px solid rgba(235,208,138,.45);color:#F3E7CE}
+.btn-ghost-light:hover{background:rgba(235,208,138,.16);border-color:rgba(235,208,138,.75);color:#FFF6DD}
 .btn-sm{padding:8px 14px;font-size:13px}
 .btn-block{width:100%}
 
@@ -294,7 +297,7 @@ footer a:hover{color:#F3E7CE}
   .modal{padding:0;place-items:end center}
   .modal-in{max-height:94vh;max-height:94dvh;border-radius:var(--r-lg) var(--r-lg) 0 0}
   .pd-art{padding:14px}
-  .pd-art svg{max-height:38vh}
+  .pd-art svg,.pd-art img{max-height:38vh}
   .pd-bd{padding:16px var(--gut) calc(20px + env(safe-area-inset-bottom))}
   .pd-bd h2{font-size:23px}
 }

@@ -39,7 +39,7 @@ export function ProductModal() {
         <div className="pd">
           <div className="pd-art">
             <div style={{ borderRadius: 16, overflow: 'hidden', border: '1px solid var(--line)' }}>
-              <ProductArt kind={product.art} seed={product.seed} w={520} h={400} />
+              <ProductArt kind={product.art} seed={product.seed} w={520} h={400} alt={`${product.name} — ${product.catName}`} />
             </div>
           </div>
           <div className="pd-bd">

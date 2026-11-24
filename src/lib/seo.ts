@@ -43,12 +43,39 @@ const PRODUCT_KEYWORDS: Array<[string, string]> = [
   ['Raisins', 'Golden Raisins (Kishmish)'],
 ];
 
+/** Generic buyer-intent searches (what shoppers type), never competitor brand names. */
+const SEARCH_INTENT_KEYWORDS = [
+  'buy dry fruits online India',
+  'buy nuts online India',
+  'dry fruits online',
+  'nuts online shopping',
+  'almonds cashews pistachios online',
+  'buy almonds online',
+  'buy cashew nuts online',
+  'buy pistachios online',
+  'buy raisins online',
+  'buy dates online',
+  'premium dry fruits',
+  'FSSAI certified dry fruits',
+  'fresh dry fruits and nuts',
+  'whole spices online India',
+  'buy spices online Kerala',
+  'Kerala cardamom online',
+  'Kerala black pepper online',
+  'buy tea and coffee online Kerala',
+  'pure coconut oil online',
+  'dry fruits Palakkad',
+  'spices Koottanad Palakkad',
+  'bulk dry fruits order',
+  'order dry fruits on WhatsApp',
+];
+
 const CATEGORY_KEYWORDS = ['Spices', 'Spice Powders', 'Coffee', 'Tea', 'Souring Agents', 'Dry Fruits & Nuts', 'Oils'];
 
 /** De-duplicated (case-insensitive) keyword list: static catalogue terms + live Sheet categories. */
 export function seoKeywords(extra: string[] = []): string[] {
   const seen = new Set<string>();
-  return [...PRODUCT_KEYWORDS.flat(), ...CATEGORY_KEYWORDS, ...extra, 'Kerala spices', 'Western Ghats', 'buy on WhatsApp']
+  return [...PRODUCT_KEYWORDS.flat(), ...CATEGORY_KEYWORDS, ...SEARCH_INTENT_KEYWORDS, ...extra, 'Kerala spices', 'Western Ghats', 'buy on WhatsApp']
     .filter((k) => {
       const key = k.toLowerCase();
       if (!k || seen.has(key)) return false;

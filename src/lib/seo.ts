@@ -68,6 +68,10 @@ const SEARCH_INTENT_KEYWORDS = [
   'spices Koottanad Palakkad',
   'bulk dry fruits order',
   'order dry fruits on WhatsApp',
+  'free shipping dry fruits',
+  'free delivery spices India',
+  'dry fruits cash on delivery',
+  'cash on delivery nuts online',
 ];
 
 const CATEGORY_KEYWORDS = ['Spices', 'Spice Powders', 'Coffee', 'Tea', 'Souring Agents', 'Dry Fruits & Nuts', 'Oils'];

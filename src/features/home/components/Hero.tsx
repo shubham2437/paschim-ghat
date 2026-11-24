@@ -55,8 +55,7 @@ export function Hero() {
               Shop {catalog ? `all ${catalog.catalogSize} products` : 'now'} →
             </a>
             <button
-              className="btn btn-ghost"
-              style={{ color: '#F3E7CE', borderColor: 'rgba(235,208,138,.4)' }}
+              className="btn btn-ghost-light"
               onClick={openWaModal}
             >
               ✆ Order on WhatsApp

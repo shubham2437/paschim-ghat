@@ -71,8 +71,8 @@ export function Hero() {
         </div>
         <div className="hero-art" aria-hidden="true">
           <div className="fl f1"><ProductArt kind={kinds[0]!} seed={31} w={460} h={320} priority /></div>
-          <div className="fl f2"><ProductArt kind={kinds[1]!} seed={77} w={420} h={300} /></div>
-          <div className="fl f3"><ProductArt kind={kinds[2]!} seed={53} w={420} h={300} /></div>
+          <div className="fl f2"><ProductArt kind={kinds[1]!} seed={77} w={420} h={300} eager /></div>
+          <div className="fl f3"><ProductArt kind={kinds[2]!} seed={53} w={420} h={300} eager /></div>
           {s?.hero_badge && <span className="hero-badge">{s.hero_badge}</span>}
         </div>
       </div>

@@ -10,6 +10,8 @@ interface ProductArtProps {
   alt?: string;
   /** Set on the first, above-the-fold image only. */
   priority?: boolean;
+  /** Above-the-fold but not the LCP image: load immediately without high fetch priority. */
+  eager?: boolean;
 }
 
 /**
@@ -17,7 +19,7 @@ interface ProductArtProps {
  * cached SVG image — no generator code ships in the client bundle and the
  * <img> is present in the server-rendered HTML.
  */
-export function ProductArt({ kind, seed, w = 420, h = 320, className, alt = '', priority = false }: ProductArtProps) {
+export function ProductArt({ kind, seed, w = 420, h = 320, className, alt = '', priority = false, eager = false }: ProductArtProps) {
   const src = `/art?kind=${kind}&seed=${seed}&w=${w}&h=${h}`;
   return (
     <div className={className}>
@@ -28,7 +30,7 @@ export function ProductArt({ kind, seed, w = 420, h = 320, className, alt = '', 
         width={w}
         height={h}
         decoding="async"
-        loading={priority ? 'eager' : 'lazy'}
+        loading={priority || eager ? 'eager' : 'lazy'}
         {...(priority ? { fetchPriority: 'high' as const } : {})}
         style={{ width: '100%', height: 'auto' }}
       />

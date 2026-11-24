@@ -62,6 +62,13 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       images: [logo],
     },
+    // Search-engine ownership codes, set as runtime variables in Cloudflare
+    // (BING_SITE_VERIFICATION = the `content` of Bing's msvalidate.01 meta tag,
+    // GOOGLE_SITE_VERIFICATION = Google Search Console's meta-tag content).
+    verification: {
+      ...(process.env.GOOGLE_SITE_VERIFICATION && { google: process.env.GOOGLE_SITE_VERIFICATION }),
+      ...(process.env.BING_SITE_VERIFICATION && { other: { 'msvalidate.01': process.env.BING_SITE_VERIFICATION } }),
+    },
     twitter: { card: 'summary', title, description, images: [logo.url] },
   };
 }

@@ -12,7 +12,7 @@ export function CategoryTiles({ categories }: { categories: CategoryDef[] }) {
       {categories.map((c, i) => (
         <a key={c.k} className="cat" href="#shop" onClick={() => setCategory(c.k)}>
           <div className="art">
-            <ProductArt kind={c.art} seed={i * 23 + 5} w={300} h={200} />
+            <ProductArt kind={c.art} seed={i * 23 + 5} w={300} h={200} alt={c.n} />
           </div>
           <b>{c.n}</b>
           <span>

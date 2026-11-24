@@ -43,7 +43,7 @@ export function ProductCard({ product }: { product: ProductDTO }) {
           {variant.avail === 'low' && <span className="bdg new">Low stock</span>}
           {soldOut && <span className="bdg" style={{ background: '#6F6A61' }}>Sold out</span>}
         </div>
-        <ProductArt kind={product.art} seed={product.seed} />
+        <ProductArt kind={product.art} seed={product.seed} alt={`${product.name} — ${product.catName}`} />
         <div className="quick">Quick view</div>
       </div>
       <div className="card-bd">

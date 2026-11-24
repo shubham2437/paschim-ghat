@@ -20,8 +20,7 @@ export function ContactBand() {
           <button className="btn btn-gold" onClick={openWaModal}>✆ WhatsApp us</button>
           {phone && (
             <a
-              className="btn btn-ghost"
-              style={{ color: '#F3E7CE', borderColor: 'rgba(235,208,138,.4)' }}
+              className="btn btn-ghost-light"
               href={`tel:${phone.replace(/[^0-9+]/g, '')}`}
             >
               ☎ {phone}

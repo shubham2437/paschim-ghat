@@ -1,55 +1,55 @@
 /** Illustration styles understood by the procedural product art
  * (src/features/catalog/product-art.ts). Picked automatically from the
  * product's name — see pickArt() in src/data/catalog.server.ts. */
-export type ArtKind =
-  // whole pieces
-  | 'almond'
-  | 'mamra'
-  | 'cashew'
-  | 'pistachio'
-  | 'walnut'
-  | 'raisin'
-  | 'currant'
-  | 'fig'
-  | 'date'
-  | 'apricot'
-  | 'makhana'
-  | 'pepper'
-  | 'cardamom'
-  | 'clove'
-  | 'seed'
-  | 'chilli'
-  | 'star'
-  | 'bark'
-  | 'bay'
-  | 'pumpkinseed'
-  | 'hazel'
-  | 'chilgoza'
-  | 'nutmeg'
-  | 'mace'
-  | 'tamarind'
-  | 'kudampuli'
-  | 'tea'
-  | 'coffeebean'
-  // powders
-  | 'redk'
-  | 'redg'
-  | 'haldi'
-  | 'dhania'
-  | 'garam'
-  | 'chole'
-  | 'biryani'
-  | 'chaat'
-  | 'kking'
-  | 'hing'
-  | 'kesar'
-  | 'pepperp'
-  | 'gingerp'
-  | 'elaichip'
-  | 'coffee'
-  | 'teadust'
-  // liquids
-  | 'oil';
+export const ART_KINDS = [
+  'almond',
+  'mamra',
+  'cashew',
+  'pistachio',
+  'walnut',
+  'raisin',
+  'currant',
+  'fig',
+  'date',
+  'apricot',
+  'makhana',
+  'pepper',
+  'cardamom',
+  'clove',
+  'seed',
+  'chilli',
+  'star',
+  'bark',
+  'bay',
+  'pumpkinseed',
+  'hazel',
+  'chilgoza',
+  'nutmeg',
+  'mace',
+  'tamarind',
+  'kudampuli',
+  'tea',
+  'coffeebean',
+  'redk',
+  'redg',
+  'haldi',
+  'dhania',
+  'garam',
+  'chole',
+  'biryani',
+  'chaat',
+  'kking',
+  'hing',
+  'kesar',
+  'pepperp',
+  'gingerp',
+  'elaichip',
+  'coffee',
+  'teadust',
+  'oil',
+] as const;
+
+export type ArtKind = (typeof ART_KINDS)[number];
 
 export type Availability = 'in' | 'low' | 'out';
 

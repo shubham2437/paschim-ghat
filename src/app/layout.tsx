@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Fraunces, Inter } from 'next/font/google';
 import './globals.css';
 import { getPublicSiteConfig } from '@/data/site-content.server';
@@ -11,6 +11,7 @@ import { WhatsAppFloat } from '@/components/layout/WhatsAppFloat';
 import { CartDrawer } from '@/features/cart/components/CartDrawer';
 import { Scrim } from '@/components/ui/Scrim';
 import { WhatsAppOrderModal } from '@/features/support/WhatsAppOrderModal';
+import { getSiteUrl } from '@/lib/seo';
 
 const fraunces = Fraunces({
   subsets: ['latin'],
@@ -41,11 +42,32 @@ function describe(categoryNames: string[]): string {
 export async function generateMetadata(): Promise<Metadata> {
   const [{ settings }, { categories }] = await Promise.all([getPublicSiteConfig(), getCatalogSnapshot()]);
   const names = categories.map((c) => c.n);
+  const title = `${settings.brand_name} — ${names.slice(0, 4).join(', ') || settings.brand_sub}`;
+  const description = settings.hero_lead || describe(names);
+  const logo = { url: '/logo.png', alt: `${settings.brand_name} logo` };
   return {
-    title: `${settings.brand_name} — ${names.slice(0, 4).join(', ') || settings.brand_sub}`,
-    description: settings.hero_lead || describe(names),
+    metadataBase: new URL(getSiteUrl()),
+    title: { default: title, template: `%s | ${settings.brand_name}` },
+    description,
+    applicationName: settings.brand_name,
+    alternates: { canonical: '/' },
+    keywords: names,
+    robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large' } },
+    openGraph: {
+      type: 'website',
+      locale: 'en_IN',
+      siteName: settings.brand_name,
+      url: '/',
+      title,
+      description,
+      images: [logo],
+    },
+    twitter: { card: 'summary', title, description, images: [logo.url] },
+    icons: { icon: '/logo.png', apple: '/logo.png' },
   };
 }
+
+export const viewport: Viewport = { themeColor: '#12362A', width: 'device-width', initialScale: 1 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { settings } = await getPublicSiteConfig();

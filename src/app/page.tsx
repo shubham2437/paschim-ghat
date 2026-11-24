@@ -1,7 +1,7 @@
 import { getPublicSiteConfig } from '@/data/site-content.server';
 import { getCatalogSnapshot } from '@/data/catalog.server';
 import { StoreApp } from '@/features/home/StoreApp';
-import { getSiteUrl, jsonLd } from '@/lib/seo';
+import { getSiteUrl, jsonLd, seoKeywords } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,6 +25,8 @@ export default async function HomePage() {
         ...(settings.email && { email: settings.email }),
         ...(settings.address && { address: { '@type': 'PostalAddress', streetAddress: settings.address, addressCountry: 'IN' } }),
         priceRange: '₹',
+        keywords: seoKeywords(products.map((p) => p.name)).join(', '),
+        knowsAbout: seoKeywords().slice(0, 40),
       },
       {
         '@type': 'ItemList',

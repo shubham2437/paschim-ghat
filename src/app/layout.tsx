@@ -11,7 +11,7 @@ import { WhatsAppFloat } from '@/components/layout/WhatsAppFloat';
 import { CartDrawer } from '@/features/cart/components/CartDrawer';
 import { Scrim } from '@/components/ui/Scrim';
 import { WhatsAppOrderModal } from '@/features/support/WhatsAppOrderModal';
-import { getSiteUrl } from '@/lib/seo';
+import { getSiteUrl, seoKeywords } from '@/lib/seo';
 
 const fraunces = Fraunces({
   subsets: ['latin'],
@@ -51,7 +51,7 @@ export async function generateMetadata(): Promise<Metadata> {
     description,
     applicationName: settings.brand_name,
     alternates: { canonical: '/' },
-    keywords: names,
+    keywords: seoKeywords(names),
     robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large' } },
     openGraph: {
       type: 'website',
